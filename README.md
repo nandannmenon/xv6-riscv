@@ -143,5 +143,3 @@ The MLFQ scheduler improves responsiveness for interactive processes and ensures
 - Smith College, *Scheduling in Unix-like Systems*  
 
 ---
-
-**Note:** This project was developed as part of the Operating Systems course at **Shiv Nadar University**.
