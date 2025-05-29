@@ -1,73 +1,73 @@
-# 🧠 MLFQ Scheduler for xv6
+# MLFQ Scheduler for xv6
 
-This project implements a **Multi-Level Feedback Queue (MLFQ)** scheduler for the [xv6](https://pdos.csail.mit.edu/6.828/2021/xv6.html) operating system. The goal is to enhance xv6’s default Round Robin scheduler by dynamically prioritizing I/O-bound processes and preventing starvation of CPU-bound processes through an **aging mechanism**.
+This project implements a **Multi-Level Feedback Queue (MLFQ)** scheduler for the [xv6](https://pdos.csail.mit.edu/6.828/2021/xv6.html) operating system. The goal is to enhance xv6’s default Round Robin scheduler by dynamically prioritizing I/O-bound processes and preventing starvation of CPU-bound processes through an aging mechanism.
 
 ---
 
-## ✅ Features
+## Features
 
 - Multiple priority queues  
 - Dynamic priority adjustment  
 - Aging mechanism to prevent starvation  
-- Better responsiveness for I/O-bound processes  
+- Improved responsiveness for I/O-bound processes  
 - Queue monitoring and debugging support  
 
 ---
 
-## 🎯 Motivation
+## Motivation
 
 The default Round Robin scheduler in xv6 treats all processes equally, which can lead to:
 
 - Poor responsiveness for interactive tasks  
-- Starvation of long-running background tasks  
+- Starvation of long-running background processes  
 
-### Our Solution: MLFQ Scheduler
+This MLFQ scheduler addresses these limitations by:
 
-- Prioritizes short and I/O-bound jobs  
-- Penalizes CPU-bound processes with lower priority  
-- Implements **aging** to promote long-waiting processes  
-- Achieves a balance between fairness and performance  
-
----
-
-## 🛠️ Design & Implementation
-
-### 🔧 Key Modifications
-
-- **`struct proc`** updated to include:
-  - `int priority` – queue level (0 = highest)
-  - `int time_slices_used` – how many ticks the process has used
-  - `int wait_time` – tracks how long a process has waited
-
-- **`scheduler()`** modified to:
-  - Select processes based on priority
-  - Adjust time slices per queue level
-  - Requeue or promote/demote processes accordingly
-
-- **`update_priorities()`** added to implement aging
+- Prioritizing short and I/O-bound jobs  
+- Penalizing CPU-bound processes with reduced priority  
+- Promoting long-waiting processes to higher priorities using an aging mechanism  
+- Providing a balanced and fair CPU scheduling approach  
 
 ---
 
-### ⚙️ Parameters
+## Design and Implementation
+
+### Key Modifications
+
+- `struct proc` updated to include:
+  - `int priority` – current queue level (0 = highest)
+  - `int time_slices_used` – number of ticks consumed in current level
+  - `int wait_time` – tracks wait time for aging
+
+- `scheduler()` modified to:
+  - Select processes based on queue priority
+  - Apply time slice restrictions per priority level
+  - Requeue or demote processes appropriately
+
+- `update_priorities()` added to apply the aging mechanism
+
+---
+
+### Parameters
 
 ```c
 #define NUM_QUEUES 3
 #define AGING_THRESHOLD 15
-#define TIME_SLICE {5, 10, 15}  // Queue 0: 5 ticks, Queue 1: 10, Queue 2: 15
+#define TIME_SLICE {5, 10, 15}  // Time slices for each queue level
 ```
 
 ---
 
-## 📜 Scheduling Logic
+## Scheduling Logic
 
-### 🧮 Process Selection
+### Process Selection
 
 ```c
 p = select_process();
 run_process(p, TIME_SLICE[p->priority]);
 ```
 
-### ⏳ On Time Slice Exhaustion
+### Time Slice Exhaustion
 
 ```c
 if (p->time_slices_used >= TIME_SLICE[p->priority]) {
@@ -79,9 +79,9 @@ if (p->time_slices_used >= TIME_SLICE[p->priority]) {
 
 ---
 
-## ⏫ Aging Mechanism
+## Aging Mechanism
 
-To prevent starvation, processes waiting too long are promoted:
+To prevent starvation, processes that have waited longer than `AGING_THRESHOLD` are promoted:
 
 ```c
 if (p->wait_time >= AGING_THRESHOLD) {
@@ -90,23 +90,25 @@ if (p->wait_time >= AGING_THRESHOLD) {
 }
 ```
 
----
-
-## 🧪 Test Programs
-
-### `cpu_bound.c`
-
-Simulates a CPU-intensive workload with heavy computation in a tight loop.
-
-### `io_bound.c`
-
-Simulates an I/O-bound workload using `sleep()` to mimic I/O wait.
+This ensures that low-priority processes eventually receive CPU time.
 
 ---
 
-## ▶️ Running the Scheduler
+## Test Programs
 
-### Step-by-Step
+### cpu_bound.c
+
+Simulates a CPU-intensive workload with continuous computation.
+
+### io_bound.c
+
+Simulates an I/O-bound workload using sleep intervals.
+
+---
+
+## Running the Scheduler
+
+### Compilation and Execution
 
 ```bash
 $ make qemu             # Compile and start xv6
@@ -116,13 +118,11 @@ $ io_bound &            # Run I/O-bound process in background
 
 ### Observation
 
-- Monitor logs for queue status
-- Observe aging and priority changes in real time
-- Compare responsiveness and starvation handling vs Round Robin
+Monitor logs and queue behavior to verify correct scheduling, demotion, promotion, and starvation prevention. Use debugging output to trace process movements across queues.
 
 ---
 
-## 📊 Results
+## Results
 
 | Metric            | Round Robin | MLFQ         |
 |-------------------|-------------|--------------|
@@ -130,16 +130,18 @@ $ io_bound &            # Run I/O-bound process in background
 | Responsiveness    | Poor        | Improved     |
 | Starvation Issues | Present     | Resolved     |
 
+The MLFQ scheduler improves responsiveness for interactive processes and ensures fairness without significant overhead.
+
 ---
 
-## 📚 References
+## References
 
-- **xv6 Source Code Documentation**  
+- xv6 Source Code Documentation  
 - S. Baruah et al., *Real-Time Scheduling in Embedded Systems*  
-- J. Li & M. Kim, *Efficient Scheduling for Multi-core Processors*  
+- J. Li and M. Kim, *Efficient Scheduling for Multi-core Processors*  
 - Arpaci-Dusseau et al., *Operating Systems: Three Easy Pieces*  
 - Smith College, *Scheduling in Unix-like Systems*  
 
 ---
 
-> 🏫 Developed as part of the Operating Systems course at **Shiv Nadar University**
+**Note:** This project was developed as part of the Operating Systems course at **Shiv Nadar University**.
