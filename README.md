@@ -1,4 +1,4 @@
-# MLFQ Scheduler for xv6 operating system
+# MLFQ Scheduler for xv6 
 
 This project implements a **Multi-Level Feedback Queue (MLFQ)** scheduler for the [xv6](https://pdos.csail.mit.edu/6.828/2021/xv6.html) operating system. The goal is to enhance xv6’s default Round Robin scheduler by dynamically prioritizing I/O-bound processes and preventing starvation of CPU-bound processes through an aging mechanism.
 
